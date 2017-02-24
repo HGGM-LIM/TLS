@@ -1,0 +1,17 @@
+PROJECT(SpeedImageUpdate_v2)
+
+cmake_minimum_required(VERSION 2.8)
+
+# Find ITK.
+FIND_PACKAGE(ITK)
+IF(ITK_FOUND)
+  INCLUDE(${ITK_USE_FILE})
+ELSE(ITK_FOUND)
+  MESSAGE(FATAL_ERROR "Cannot build without ITK.  Please set ITK_DIR.")
+ENDIF(ITK_FOUND)
+
+FIND_PACKAGE(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+ADD_EXECUTABLE(SpeedImageUpdate_v2 SpeedImageUpdate_v2.cxx)
+TARGET_LINK_LIBRARIES(SpeedImageUpdate_v2 ${ITK_LIBRARIES} ${VTK_LIBRARIES})

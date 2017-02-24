@@ -1,0 +1,107 @@
+###########################################################################################################################
+### DON'T FORGET TO INCLUDE CMAKE_BUILD_TYPE = DEBUG  IN CASE YOU WANT TO DEVELOP (at least is hot works for eclipse) #####
+###########################################################################################################################
+
+cmake_minimum_required(VERSION 2.6)
+project(ralph)
+INCLUDE(CPack)
+INCLUDE(CTest)
+
+#ENABLE_TESTING()
+#IF(BUILD_TESTING)
+#  SET(BUILDNAME "${BUILDNAME}" CACHE STRING "Name of build on the dashboard")
+#  MARK_AS_ADVANCED(BUILDNAME)
+#ENDIF(BUILD_TESTING)
+message(cmakedir ${CMAKE_CURRENT_SOURCE_DIR})
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/;${CMAKE_MODULE_PATH}")
+
+message(${ITK_LIBRARIES} prefinditk)
+FIND_PACKAGE(ITK REQUIRED)
+INCLUDE(${ITK_USE_FILE})
+message(${ITK_USE_FILE} "itkr")
+message(${ITK_LIBRARIES} post-find-itk)
+
+
+FIND_PACKAGE(VTK REQUIRED)
+
+INCLUDE(${VTK_USE_FILE})
+include_directories( ${VTK_INCLUDE_DIRS} )
+link_directories( ${VTK_LIBRARY_DIRS} )
+#message("dirvtk"${VTK_INCLUDE_DIRS})
+
+
+FIND_PACKAGE(LOG4CPP REQUIRED)
+include_directories( ${log4cpp_INCLUDE_DIRS} )
+link_directories( ${log4cpp_LIBRARY_DIRS} )
+
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options REQUIRED )
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+
+
+#SET(RALPH_FILTERS_UNPREFIXED_BIN_INSTALL_DIR "/lib${LIB_SUFFIX}/ralph/filters")
+SET(RALPH_FILTERS_UNPREFIXED_BIN_INSTALL_DIR "/home/pmacias/Projects/MonkeysTuberculosis/xabiShirt/mrTest/binUnPr")
+#SET(RALPH_FILTERS_BIN_INSTALL_DIR "/usr/lib${LIB_SUFFIX}/ralph/filters")
+SET(RALPH_FILTERS_BIN_INSTALL_DIR "/home/pmacias/Projects/MonkeysTuberculosis/xabiShirt/mrTest/binInsDir")
+#SET(RALPH_FILTERS_DEVEL_INSTALL_DIR "/include/ralph")
+SET(RALPH_FILTERS_DEVEL_INSTALL_DIR "/home/pmacias/Projects/MonkeysTuberculosis/xabiShirt/mrTest/include")
+
+# Windows compiler specific
+#IF (WIN32)
+#    ADD_DEFINITIONS(-DWIN32 -D__WIN32__ -D_WINDOWS -D__WINDOWS__)
+ #   ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
+ #   ADD_DEFINITIONS(-DNOMINMAX -DWINVER=0x0500 -DSTRICT)
+  #  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo /wd4251 /wd4275")
+#ENDIF (WIN32)
+
+# install devel files
+OPTION(INSTALL_DEVEL_FILES "Install C++ headers" ON)
+
+# option for wrapping
+OPTION(BUILD_WRAPPERS "Wrap library" OFF)
+IF(BUILD_WRAPPERS)
+   SUBDIRS(Wrapping)
+ENDIF(BUILD_WRAPPERS)
+
+
+link_directories (${CMAKE_CURRENT_BINARY_DIR}/libs)
+#link_directories (/home/mceresa/workspace/cfilters_bin/libs)
+INCLUDE_DIRECTORIES(libs) 
+ADD_SUBDIRECTORY(libs)
+ADD_SUBDIRECTORY(checkers)
+ADD_SUBDIRECTORY(Lungs_Segmentation)
+ADD_SUBDIRECTORY(utilities)
+ADD_SUBDIRECTORY(registration)
+ADD_SUBDIRECTORY(externals)
+ADD_SUBDIRECTORY(propagator)
+ADD_SUBDIRECTORY(SpeedImageCalc)
+ADD_SUBDIRECTORY(Texture)
+#ADD_SUBDIRECTORY(StupidTest)
+#ADD_SUBDIRECTORY(xabi_filters)
+
+
+#TARGET_LINK_LIBRARIES(ITKAlgorithms ITKIO ITKBasicFilters ITKCommon ITKStatistics)
+#target_link_libraries(${ITK_LIBRARIES}) 
+#target_link_libraries(${VTK_LIBRARIES})
+#add_library(ralph)
+#target_link_libraries(ralph ${ITK_LIBRARIES} ${VTK_LIBRARIES}) 
+#Pedro's
+#TARGET_LINK_LIBRARIES ( ${ITK_LIBRARIES} ${VTK_LIBRARIES}) 
+
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+        LIST(APPEND dirlist ${child})
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
+#SUBDIRLIST(SUBDIRS /home/pmacias/Projects/MonkeysTuberculosis/mrceresa-ralph-cfilters-5321a62e9b9f/xabi_filters)
+#FOREACH(subdir ${SUBDIRS})
+#    ADD_SUBDIRECTORY(xabi_filters/${subdir}/src/)
+#ENDFOREACH()
+
+
+
+

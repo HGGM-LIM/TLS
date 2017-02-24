@@ -1,0 +1,87 @@
+Airway Wall Quantification
+
+Requirement
+===========
+Libraries necessary:
+--------------------
+- boost, geos 
+- mysql, mysql-devel, mysql-server, libodb-1.1.0, libodb-mysql-1.1.0 (if MySQL support desired)
+- xerces (if XML support desired) 
+
+
+Input files are: 
+----------------
+1. segment_tree.csv with format as follows:
+[SegmentID,ParentSegmentID,Length,Radius,PointCount,Centroids,OrientationNorm,FinalNorm], eg:
+1,-1,93.1003959193,448.7,10,"['[260.002096436, 237.916142558, 4.4821802935]', '[261.850855746, 245.740831296, 15.3740831296]', '[261.197802198, 250.145054945, 25.043956044]', '[259.602459016, 253.944672131, 34.6393442623]', '[257.424307036, 257.620469083, 44.1108742004]', '[253.868020305, 261.672588832, 53.1116751269]', '[250.855555556, 265.580555556, 61.9222222222]', '[250.863636364, 269.235930736, 71.0584415584]', '[251.245009074, 271.923774955, 80.1542649728]', '[249.82464455, 272.018957346, 88.1895734597]']","(-0.10525300089, 0.415061098923, 0.903684729297)","(-0.117134326457, 0.323140082497, 0.939074031506)"
+(can be generated manually or using visitor)
+
+2. grayscale image (raw or filtered)
+
+3. binary image
+
+Options
+-------
+- base_dir: prepended before the binaryImage & originalImage names. Location of the directory where the input files are. 
+- result_base_dir: location where the output files are saved
+
+(phantom only)
+- lambda: correction factor for area under the curve calculation (optimal value is experimentally obtained) that depends on reconstruction kernel & orientation of the tubular structure 
+- saveToPersistence: 1 or 0 (see "SQL Option")
+- xmlMode: 1 or 0
+- zspacing: certain DICOM formats do not store z-spacing well - insert your own
+- experimentID: id of experiment (for purposes of identifying data in SQL storage & stats analysis)
+- trueValues.csv: CSV containing the true values with format as described in "True values Option"
+- suppressOutput: 1 or 0. Suppressed means only the final values (see "True values Option")
+
+(human only)
+- excludeBifurc: 1 or 0. If turned on, the areas of bifurcations are excluded (first and last 15% of the points along the segment).
+- lambda: same as phantom. (FIXME) Deprecated. (FIXME) Should calculate automatically. Configure lambdaCurve() according to values obtained experimentally. If lambdaCurve() is not defined properly, then this user-supplied lambda is used for all the segments.
+
+SQL Option
+----------
+To configure the SQL:
+- configure Measure.hxx and ImageEntity.hxx, compile and don't forget to link Measure-odb.o and ImageEntity-odb.o
+- from the generated sql files: Measure.sql and ImageEntity.sql, run & initialize (if necessary! CAUTION: may erase your table).
+- see tests/generatePersistence.sh (Example files given for MySQL database. But others are also supported. See http://www.codesynthesis.com/pipermail/odb-announcements/2011/000003.html)
+- (FIXME) configure the database connection option from within the persist() method. At doc1.cima.es, use localhost/odb_test/odb_test/""
+- pre-populate the table Measure, eg:
+|  1 | WT         |
+|  2 | LR         |
+|  3 | WAPerc     |
+|  4 | BC         |
+|  5 | TL         |
+|  6 | Peri       |
+|  7 | LA         |
+|  8 | NASCount   |
+|  9 | EI         |
+| 10 | MLD        |
+| 11 | HIST       |
+| 12 | VOL        |
+| 13 | TreeVol    |
+| 27 | FilteredWT |
+| 28 | FWHMWT     |
+| 29 | CalcLR     |
+| 30 | Angle      |
+| 31 | Generation |
+
+
+True values Option 
+------------------
+(need SQL option turned on)
+True values option is used to calculate the measured quantity vs the true values supplied. For this to work, the input must be given in:
+[MeasureID, SegmentID, Value]
+
+Running
+-------
+To run on phantom with true values known (SQL needed):
+./AirwayWall_Phantom base_dir segment_tree.csv binaryImage originalImage result_base_dir num_of_rays lambda saveToPersistence xmlMode zspacing experimentID suppressOutput trueValues.csv
+
+To run on phantom with no sql:
+./AirwayWall_Phantom_NoSQL base_dir segment_tree.csv binaryImage originalImage result_base_dir num_of_rays lambda xmlMode zspacing
+
+To run on human scans:
+./AirwayWall_Human base_dir segment_tree.csv binaryImage originalImage result_base_dir num_of_rays lambda saveToPersistence xmlMode zspacing experimentID excludeBifurc
+
+To run on human scans with no sql:
+./AirwayWall_Human base_dir segment_tree.csv binaryImage originalImage result_base_dir num_of_rays lambda xmlMode zspacing excludeBifurc

@@ -1,0 +1,23 @@
+#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
+
+#FIND_PACKAGE( Boost 1.59 COMPONENTS program_options REQUIRED )
+#INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+find_package(Boost COMPONENTS filesystem program_options REQUIRED)
+
+#INCLUDE_DIRECTORIES( ${BOOST_LIBRARYDIR} )
+#INCLUDE_DIRECTORIES( ${BOOST_ROOT} )
+#include_directories(${Boost_INCLUDE_DIRS}) 
+
+ADD_EXECUTABLE(probe probe.cxx)
+TARGET_LINK_LIBRARIES(probe ${ITK_LIBRARIES} ${Boost_LIBRARIES} )
+
+ADD_EXECUTABLE(probe_field probe_field.cxx)
+TARGET_LINK_LIBRARIES(probe_field ${ITK_LIBRARIES} ${Boost_LIBRARIES} )
+
+ADD_EXECUTABLE(EvaluateAirways EvaluateAirways.cxx)
+TARGET_LINK_LIBRARIES(EvaluateAirways ${ITK_LIBRARIES} )
+
+#INSTALL(TARGETS EvaluateAirways probe probe_field RUNTIME DESTINATION ${TLS_FILTERS_BIN_INSTALL_DIR}
